@@ -12,13 +12,13 @@ defmodule Poly1305 do
   def hmac(m,k) do
     {r,s} = split_key(k)
     a = process_message(m, r,0)
-    a+s |> :binary.encode_unsigned(:little) |> result_pad |> binary_part(0,16)
+    a+s |> :binary.encode_unsigned(:little) |> result_align
   end
 
   def key_gen(k,n), do: Chacha20.block(k,n,0) |> binary_part(0,32)
 
-  defp result_pad(s) when byte_size(s) >= 16, do: s
-  defp result_pad(s) when byte_size(s) < 16, do: result_pad(s<><<0>>)
+  defp result_align(s) when byte_size(s) >= 16, do: binary_part(s,0,16)
+  defp result_align(s) when byte_size(s) < 16, do: align_pad(s,16)
 
   defp process_message(<<>>,_r,a), do: a
   defp process_message(m,r,a) do
@@ -28,5 +28,31 @@ defmodule Poly1305 do
     n = binary_part(m,0,bend)<><<1>> |> :binary.decode_unsigned(:little)
     binary_part(m,bend,rest) |> process_message(r,rem((r * (a + n)) , p))
   end
+
+  def aead_encrypt(m,k,n,a) do
+      otk = key_gen(k,n)
+      {c,_s} = Chacha20.crypt_bytes(m,{k,n,1,""},[])
+      md  = align_pad(a,16)<>align_pad(c,16)<>msg_length(a)<>msg_length(c)
+
+      {c, hmac(md,otk)}
+  end
+
+  def aead_decrypt(c,k,n,a,t) do
+      otk = key_gen(k,n)
+      md  = align_pad(a,16)<>align_pad(c,16)<>msg_length(a)<>msg_length(c)
+      case hmac(md,otk) do
+          ^t -> {m, _} = Chacha20.crypt_bytes(c,{k,n,1,""},[])
+                m
+          _  -> :error # Unauthenticated message.
+      end
+  end
+
+  def msg_length(s), do: s |> byte_size |> :binary.encode_unsigned(:little) |> align_pad(8)
+
+  def align_pad(s,n), do: s<>zeroes(n - rem(byte_size(s), n))
+
+  defp zeroes(n), do: zero_loop(<<>>, n)
+  defp zero_loop(z,0), do: z
+  defp zero_loop(z,n), do: zero_loop(z<><<0>>, n-1)
 
 end
