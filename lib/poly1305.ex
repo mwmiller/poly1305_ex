@@ -31,7 +31,7 @@ defmodule Poly1305 do
 
   def aead_encrypt(m,k,n,a) do
       otk = key_gen(k,n)
-      {c,_s} = Chacha20.crypt_bytes(m,{k,n,1,""},[])
+      c   = Chacha20.crypt(m,k,n,1)
       md  = align_pad(a,16)<>align_pad(c,16)<>msg_length(a)<>msg_length(c)
 
       {c, hmac(md,otk)}
@@ -41,8 +41,7 @@ defmodule Poly1305 do
       otk = key_gen(k,n)
       md  = align_pad(a,16)<>align_pad(c,16)<>msg_length(a)<>msg_length(c)
       case hmac(md,otk) do
-          ^t -> {m, _} = Chacha20.crypt_bytes(c,{k,n,1,""},[])
-                m
+          ^t -> Chacha20.crypt(c,k,n,1)
           _  -> :error # Unauthenticated message.
       end
   end
