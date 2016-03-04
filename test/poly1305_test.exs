@@ -3,13 +3,13 @@ defmodule Poly1305Test do
   doctest Poly1305
 
   test "hmac" do
-    k = "need a 64-byte key which breaks down into r and s to do the hmac"
+    k = "need a 32 byte shared secret key"
     m = "some short message"
 
-    assert Poly1305.hmac(m,k) == <<186, 21, 153, 88, 157, 16, 187, 65, 47, 135, 16, 191, 154, 105, 127, 18>>
+    assert Poly1305.hmac(m,k) == <<180, 131, 109, 239, 182, 152, 38, 175, 212, 5, 234, 60, 248, 220, 162, 85>>
 
     m = "some short massage"
-    assert Poly1305.hmac(m,k) == <<193, 127, 235, 46, 77, 88, 115, 45, 208, 122, 147, 75, 16, 132, 134, 101>>
+    assert Poly1305.hmac(m,k) == <<40, 203, 83, 169, 30, 211, 102, 220, 180, 219, 33, 51, 211, 153, 31, 146>>
   end
 
   test "aead round trip" do

@@ -2,19 +2,46 @@ defmodule Poly1305 do
   require Chacha20
   import Bitwise
 
-  def clamp(r), do: r &&& 0x0ffffffc0ffffffc0ffffffc0fffffff
+  @moduledoc """
+  Poly1305 message authentication
 
-  def split_key(k), do: {binary_part(k,0,16)  |> :binary.decode_unsigned(:little) |> clamp,
+  https://tools.ietf.org/html/rfc7539
+  """
+  @typedoc """
+  Encryption key
+  """
+  @type key :: <<_::32 * 8>>
+  @typedoc """
+  Per-message nonce
+
+  By convention, the first 4 bytes should be sender-specific.
+  The trailing 8 bytes may be as simple as a counter.
+  """
+  @type nonce :: <<_::12 * 8 >>
+  @typedoc """
+  MAC tag
+  """
+  @type tag :: <<_::16 * 8 >>
+
+  defp clamp(r), do: r &&& 0x0ffffffc0ffffffc0ffffffc0fffffff
+
+  defp split_key(k), do: {binary_part(k,0,16)  |> :binary.decode_unsigned(:little) |> clamp,
                          binary_part(k,16,16) |> :binary.decode_unsigned(:little)}
 
-  def p, do: 0x3fffffffffffffffffffffffffffffffb
+  defp p, do: 0x3fffffffffffffffffffffffffffffffb
 
+  @doc """
+  Compute a Message authentication code
+
+  The one-time key should never be reused.
+  """
+  @spec hmac(binary,key) :: tag
   def hmac(m,k) do
     {r,s} = split_key(k)
-    a = process_message(m, r,0)
-    a+s |> :binary.encode_unsigned(:little) |> result_align
+    process_message(m,r,0)+s |> :binary.encode_unsigned(:little) |> result_align
   end
 
+  @doc false
   def key_gen(k,n), do: Chacha20.block(k,n,0) |> binary_part(0,32)
 
   defp result_align(s) when byte_size(s) >= 16, do: binary_part(s,0,16)
@@ -28,7 +55,17 @@ defmodule Poly1305 do
     n = binary_part(m,0,bend)<><<1>> |> :binary.decode_unsigned(:little)
     binary_part(m,bend,rest) |> process_message(r,rem((r * (a + n)) , p))
   end
+  @doc """
+    authenticated encryption with additional data - encryption
 
+    - message to be encrypted
+    - shared secret key
+    - one time use nonce
+    - additional data
+
+    The return value will be a tuple of `{ciphertext, MAC}`
+  """
+  @spec aead_encrypt(binary,key,nonce,binary) :: {binary, tag}
   def aead_encrypt(m,k,n,a) do
       otk = key_gen(k,n)
       c   = Chacha20.crypt(m,k,n,1)
@@ -37,6 +74,18 @@ defmodule Poly1305 do
       {c, hmac(md,otk)}
   end
 
+  @doc """
+    authenticated encryption with additional data - decryption
+
+    - encrypted message
+    - shared secret key
+    - one time use nonce
+    - additional data
+    - MAC
+
+    On success, returns the plaintext message.
+  """
+  @spec aead_decrypt(binary,key,nonce,binary,tag) :: binary | :error
   def aead_decrypt(c,k,n,a,t) do
       otk = key_gen(k,n)
       md  = align_pad(a,16)<>align_pad(c,16)<>msg_length(a)<>msg_length(c)
@@ -46,9 +95,9 @@ defmodule Poly1305 do
       end
   end
 
-  def msg_length(s), do: s |> byte_size |> :binary.encode_unsigned(:little) |> align_pad(8)
+  defp msg_length(s), do: s |> byte_size |> :binary.encode_unsigned(:little) |> align_pad(8)
 
-  def align_pad(s,n), do: s<>zeroes(n - rem(byte_size(s), n))
+  defp align_pad(s,n), do: s<>zeroes(n - rem(byte_size(s), n))
 
   defp zeroes(n), do: zero_loop(<<>>, n)
   defp zero_loop(z,0), do: z
