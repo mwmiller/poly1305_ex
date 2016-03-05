@@ -60,10 +60,16 @@ defmodule Poly1305 do
 
     - message to be encrypted
     - shared secret key
-    - one time use nonce
-    - additional data
+    - one-time use nonce
+    - additional authenticated data
 
     The return value will be a tuple of `{ciphertext, MAC}`
+
+    The algorithm is applied as described in RFC7539:
+
+    - The key and nonce are used to encrypt the message with ChaCha20.
+    - The one-time MAC key is derived from the cipher key and nonce.
+    - The ciphertext and additional data are authenticated with the MAC
   """
   @spec aead_encrypt(binary,key,nonce,binary) :: {binary, tag}
   def aead_encrypt(m,k,n,a) do
@@ -79,11 +85,12 @@ defmodule Poly1305 do
 
     - encrypted message
     - shared secret key
-    - one time use nonce
-    - additional data
+    - one-time use nonce
+    - additional authenticated data
     - MAC
 
-    On success, returns the plaintext message.
+    On success, returns the plaintext message.  If the message cannot be
+    authenticated `:error` is returned.
   """
   @spec aead_decrypt(binary,key,nonce,binary,tag) :: binary | :error
   def aead_decrypt(c,k,n,a,t) do
