@@ -96,10 +96,8 @@ defmodule Poly1305 do
   def aead_decrypt(c,k,n,a,t) do
       otk = key_gen(k,n)
       md  = align_pad(a,16)<>align_pad(c,16)<>msg_length(a)<>msg_length(c)
-      case hmac(md,otk) do
-          ^t -> Chacha20.crypt(c,k,n,1)
-          _  -> :error # Unauthenticated message.
-      end
+      m   = Chacha20.crypt(c,k,n,1)
+      if hmac(md,otk) == t, do: m, else: :error
   end
 
   defp msg_length(s), do: s |> byte_size |> :binary.encode_unsigned(:little) |> align_pad(8)
