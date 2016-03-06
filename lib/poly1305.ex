@@ -102,8 +102,12 @@ defmodule Poly1305 do
 
   defp msg_length(s), do: s |> byte_size |> :binary.encode_unsigned(:little) |> align_pad(8)
 
-  defp align_pad(<<>>,_n), do: <<>>   # Let empties stay empty, will affect message padding, not result padding.
-  defp align_pad(s,n), do: s<>zeroes(n - rem(byte_size(s), n))
+  defp align_pad(s,n) do
+    case s |> byte_size |> rem(n) do
+        0       -> s      # Already the proper width
+        r       -> s<>zeroes(n - r)
+    end
+  end
 
   defp zeroes(n), do: zero_loop(<<>>, n)
   defp zero_loop(z,0), do: z
