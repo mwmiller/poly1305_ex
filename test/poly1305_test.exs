@@ -47,4 +47,14 @@ defmodule Poly1305Test do
 
   end
 
+  test "empty aad" do
+    k   = "need a 32 byte shared secret key"
+    n   = "w/ 12B nonce"
+    m   = "my secret message"
+
+    {c,t} = Poly1305.aead_encrypt(m,k,n)
+    assert Poly1305.aead_decrypt(c,k,n,t) == m
+
+  end
+
 end

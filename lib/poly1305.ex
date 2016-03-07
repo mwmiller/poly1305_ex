@@ -72,7 +72,7 @@ defmodule Poly1305 do
     - The ciphertext and additional data are authenticated with the MAC
   """
   @spec aead_encrypt(binary,key,nonce,binary) :: {binary, tag}
-  def aead_encrypt(m,k,n,a) do
+  def aead_encrypt(m,k,n,a \\ "") do
       otk = key_gen(k,n)
       c   = Chacha20.crypt(m,k,n,1)
       md  = align_pad(a,16)<>align_pad(c,16)<>msg_length(a)<>msg_length(c)
@@ -93,7 +93,7 @@ defmodule Poly1305 do
     authenticated `:error` is returned.
   """
   @spec aead_decrypt(binary,key,nonce,binary,tag) :: binary | :error
-  def aead_decrypt(c,k,n,a,t) do
+  def aead_decrypt(c,k,n,a \\ "",t) do
       otk = key_gen(k,n)
       md  = align_pad(a,16)<>align_pad(c,16)<>msg_length(a)<>msg_length(c)
       m   = Chacha20.crypt(c,k,n,1)
