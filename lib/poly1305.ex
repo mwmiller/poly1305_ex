@@ -114,8 +114,8 @@ defmodule Poly1305 do
   defp zero_loop(z,n), do: zero_loop(z<><<0>>, n-1)
 
   defp string_compare(a,b) when byte_size(a) != byte_size(b), do: false # They already know how long it should be, so this does not leak info
-  defp string_compare(a,b) when byte_size(a) == byte_size(b), do: cmp_strings_loop(a,b,0,byte_size(a))
-  defp cmp_strings_loop(<<>>,<<>>,c,s), do: c == s
-  defp cmp_strings_loop(<<a,resta::binary>>,<<b,restb::binary>>,c,s), do: cmp_strings_loop(resta, restb, c+(if a == b, do: 1, else: 2), s)
+  defp string_compare(a,b) when byte_size(a) == byte_size(b), do: cmp_strings_loop(a,b,1)
+  defp cmp_strings_loop(<<>>,<<>>,c), do: c == 1
+  defp cmp_strings_loop(<<a,resta::binary>>,<<b,restb::binary>>,c), do: cmp_strings_loop(resta, restb, c &&& (if a == b, do: 1, else: 0))
 
 end
