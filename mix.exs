@@ -3,7 +3,7 @@ defmodule Poly1305.Mixfile do
 
   def project do
     [app: :poly1305,
-     version: "0.2.1",
+     version: "0.2.2",
      elixir: "~> 1.2",
      name: "Poly1305",
      source_url: "https://github.com/mwmiller/poly1305_ex",

@@ -47,14 +47,14 @@ defmodule Poly1305 do
   defp result_align(s) when byte_size(s) >= 16, do: binary_part(s,0,16)
   defp result_align(s) when byte_size(s) < 16, do: align_pad(s,16)
 
+  defp int_pow_two(n), do: :math.pow(2,n) |> round
+
   defp process_message(<<>>,_r,a), do: a
-  defp process_message(m,r,a) do
-    size = byte_size m
-    bend = Enum.min([16,size])
-    rest = size - bend
-    n = binary_part(m,0,bend)<><<1>> |> :binary.decode_unsigned(:little)
-    binary_part(m,bend,rest) |> process_message(r,rem((r * (a + n)) , p))
-  end
+  defp process_message(<<i::unsigned-little-integer-size(128), rest::binary>>,r,a), do: process_message(rest, r, new_a(i,a,r,128))
+  defp process_message(m,r,a), do: m |> :binary.decode_unsigned(:little) |> new_a(a,r,bit_size(m))
+
+  defp new_a(i,a,r,s), do: (r * (a + i + int_pow_two(s))) |> rem(p)
+
   @doc """
     authenticated encryption with additional data - encryption
 
