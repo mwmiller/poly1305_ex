@@ -97,7 +97,7 @@ defmodule Poly1305 do
       otk = key_gen(k,n)
       md  = align_pad(a,16)<>align_pad(c,16)<>msg_length(a)<>msg_length(c)
       m   = Chacha20.crypt(c,k,n,1)
-      if hmac(md,otk) |> compare(t), do: m, else: :error
+      if hmac(md,otk) |> same_hmac?(t), do: m, else: :error
   end
 
   defp msg_length(s), do: s |> byte_size |> :binary.encode_unsigned(:little) |> align_pad(8)
@@ -121,9 +121,9 @@ defmodule Poly1305 do
   related to these HMACs.  We assume they already know the length
   of the "unknown" string
   """
-  @spec compare(binary, binary) :: boolean
-  def compare(a,b) when byte_size(a) != byte_size(b), do: false # They already know how long it should be, so this does not leak info
-  def compare(a,b) when byte_size(a) == byte_size(b), do: cmp_strings_loop(a,b,1)
+  @spec same_hmac?(binary, binary) :: boolean
+  def same_hmac?(a,b) when byte_size(a) != byte_size(b), do: false # They already know how long it should be, so this does not leak info
+  def same_hmac?(a,b) when byte_size(a) == byte_size(b), do: cmp_strings_loop(a,b,1)
   defp cmp_strings_loop(<<>>,<<>>,c), do: c == 1
   defp cmp_strings_loop(<<a,resta::binary>>,<<b,restb::binary>>,c), do: cmp_strings_loop(resta, restb, c &&& (if a == b, do: 1, else: 0))
 
