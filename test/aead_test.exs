@@ -1,5 +1,5 @@
 defmodule AeadTest do
-  use PowerAssert
+  use ExUnit.Case
   import VectorHelper
 
   test "rfc example" do

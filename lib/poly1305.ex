@@ -10,18 +10,18 @@ defmodule Poly1305 do
   @typedoc """
   Encryption key
   """
-  @type key :: <<_::32 * 8>>
+  @type key :: binary
   @typedoc """
   Per-message nonce
 
   By convention, the first 4 bytes should be sender-specific.
   The trailing 8 bytes may be as simple as a counter.
   """
-  @type nonce :: <<_::12 * 8 >>
+  @type nonce :: binary
   @typedoc """
   MAC tag
   """
-  @type tag :: <<_::16 * 8 >>
+  @type tag :: binary
 
   defp clamp(r), do: r &&& 0x0ffffffc0ffffffc0ffffffc0fffffff
 

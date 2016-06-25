@@ -1,5 +1,5 @@
 defmodule Poly1305Test do
-  use PowerAssert
+  use ExUnit.Case
   doctest Poly1305
 
   test "hmac" do

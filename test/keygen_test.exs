@@ -1,5 +1,5 @@
 defmodule KeygenTest do
-  use PowerAssert
+  use ExUnit.Case
   import VectorHelper
   doctest Poly1305
 
