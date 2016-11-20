@@ -3,7 +3,7 @@ defmodule Poly1305.Mixfile do
 
   def project do
     [app: :poly1305,
-     version: "0.4.3",
+     version: "0.4.4",
      elixir: "~> 1.3",
      name: "Poly1305",
      source_url: "https://github.com/mwmiller/poly1305_ex",
@@ -23,7 +23,7 @@ defmodule Poly1305.Mixfile do
       {:chacha20, "~> 0.3"},
       {:equivalex, "~> 0.1"},
       {:earmark, "~> 1.0", only: :dev},
-      {:ex_doc, "~> 0.13", only: :dev},
+      {:ex_doc, "~> 0.14", only: :dev},
     ]
   end
 
