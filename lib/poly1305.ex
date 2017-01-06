@@ -53,7 +53,7 @@ defmodule Poly1305 do
   defp process_message(<<i::unsigned-little-integer-size(128), rest::binary>>,r,a), do: process_message(rest, r, new_a(i,a,r,128))
   defp process_message(m,r,a), do: m |> :binary.decode_unsigned(:little) |> new_a(a,r,bit_size(m))
 
-  defp new_a(i,a,r,s), do: (r * (a + i + int_pow_two(s))) |> rem(p)
+  defp new_a(i,a,r,s), do: (r * (a + i + int_pow_two(s))) |> rem(p())
 
   @doc """
     authenticated encryption with additional data - encryption

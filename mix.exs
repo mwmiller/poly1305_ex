@@ -3,15 +3,15 @@ defmodule Poly1305.Mixfile do
 
   def project do
     [app: :poly1305,
-     version: "0.4.4",
-     elixir: "~> 1.3",
+     version: "0.4.5",
+     elixir: "~> 1.4",
      name: "Poly1305",
      source_url: "https://github.com/mwmiller/poly1305_ex",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     description: description,
-     package: package,
-     deps: deps]
+     description: description(),
+     package: package(),
+     deps: deps()]
   end
 
   def application do
