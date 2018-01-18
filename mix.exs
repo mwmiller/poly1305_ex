@@ -2,16 +2,18 @@ defmodule Poly1305.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :poly1305,
-     version: "1.0.1",
-     elixir: "~> 1.4",
-     name: "Poly1305",
-     source_url: "https://github.com/mwmiller/poly1305_ex",
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     description: description(),
-     package: package(),
-     deps: deps()]
+    [
+      app: :poly1305,
+      version: "1.0.1",
+      elixir: "~> 1.4",
+      name: "Poly1305",
+      source_url: "https://github.com/mwmiller/poly1305_ex",
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
+      description: description(),
+      package: package(),
+      deps: deps()
+    ]
   end
 
   def application do
@@ -24,7 +26,7 @@ defmodule Poly1305.Mixfile do
       {:equivalex, "~> 1.0"},
       {:earmark, "~> 1.0", only: :dev},
       {:ex_doc, "~> 0.14", only: :dev},
-      {:credo, "~> 0.8", only: [:dev, :test]},
+      {:credo, "~> 0.8", only: [:dev, :test]}
     ]
   end
 
@@ -36,12 +38,13 @@ defmodule Poly1305.Mixfile do
 
   defp package do
     [
-     files: ["lib", "mix.exs", "README*", "LICENSE*", ],
-     maintainers: ["Matt Miller"],
-     licenses: ["MIT"],
-     links: %{"GitHub" => "https://github.com/mwmiller/poly1305_ex",
-              "RFC"    => "https://tools.ietf.org/html/rfc7539",
-             }
+      files: ["lib", "mix.exs", "README*", "LICENSE*"],
+      maintainers: ["Matt Miller"],
+      licenses: ["MIT"],
+      links: %{
+        "GitHub" => "https://github.com/mwmiller/poly1305_ex",
+        "RFC" => "https://tools.ietf.org/html/rfc7539"
+      }
     ]
   end
 end
